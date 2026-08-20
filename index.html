@@ -1,101 +1,61 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Portfólio</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --accent-color: #38bdf8;
-            --text-secondary: #94a3b8;
-        }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Controle de estoque" />
+    <title>Controle de Estoque</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main id="auth-screen" class="auth-shell">
+      <section class="auth-card">
+        <p class="eyebrow">CONTROLE DE ESTOQUE</p>
+        <h1>Entre na sua conta</h1>
+        <p class="muted">Use o e-mail cadastrado pelo administrador.</p>
+        <form id="login-form" class="stack">
+          <label>E-mail<input id="login-email" type="email" autocomplete="email" required /></label>
+          <label>Senha<input id="login-password" type="password" autocomplete="current-password" required /></label>
+          <button type="submit">Entrar</button>
+        </form>
+        <details>
+          <summary>Primeiro acesso? Criar conta</summary>
+          <form id="signup-form" class="stack spaced-top">
+            <label>Nome<input id="signup-name" type="text" autocomplete="name" required /></label>
+            <label>E-mail<input id="signup-email" type="email" autocomplete="email" required /></label>
+            <label>Senha (ao menos 8 caracteres)<input id="signup-password" type="password" minlength="8" autocomplete="new-password" required /></label>
+            <button type="submit" class="secondary">Solicitar acesso</button>
+          </form>
+          <p class="hint">Novas contas comecam como visualizadoras. Um administrador deve liberar o perfil.</p>
+        </details>
+        <p id="auth-message" class="message" aria-live="polite"></p>
+      </section>
+    </main>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 600px;
-            width: 90%;
-            background-color: var(--card-bg);
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
-
-        .avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: var(--bg-color);
-            font-weight: bold;
-        }
-
-        h1 {
-            margin: 10px 0;
-            font-size: 28px;
-        }
-
-        p {
-            color: var(--text-secondary);
-            font-size: 16px;
-            line-height: 1.5;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            display: inline-block;
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: opacity 0.2s;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        footer {
-            margin-top: 40px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="avatar">DEV</div>
-        <h1>Olá, eu sou um Desenvolvedor!</h1>
-        <p>Bem-vindo ao meu espaço na web. Estou aprendendo a criar coisas incríveis e este é o meu primeiro site publicado via GitHub Pages.</p>
-        
-        <a href="https://github.com" target="_blank" class="btn">Visite meu GitHub</a>
-
-        <footer>
-            <p>Feito com 💙 e hospedado no GitHub Pages.</p>
-        </footer>
+    <div id="app" class="app hidden">
+      <aside class="sidebar">
+        <div><p class="eyebrow">ESTOQUE</p><h1>Controle</h1></div>
+        <nav id="navigation" aria-label="Navegacao principal">
+          <button data-page="dashboard" class="active">Visao geral</button>
+          <button data-page="products">Produtos</button>
+          <button data-page="movements">Movimentacoes</button>
+          <button data-page="condiments">Condimentos</button>
+          <button data-page="reports">Relatorios</button>
+          <button data-page="users" data-admin-only>Usuarios</button>
+        </nav>
+        <div class="account"><strong id="user-name"></strong><span id="user-role" class="badge"></span><button id="logout" class="link-button">Sair</button></div>
+      </aside>
+      <main class="content">
+        <div id="toast" class="toast" role="status"></div>
+        <header class="page-header"><div><p id="page-kicker" class="eyebrow">PAINEL</p><h2 id="page-title">Visao geral</h2></div><button id="refresh" class="secondary">Atualizar</button></header>
+        <section id="page-content"></section>
+      </main>
     </div>
 
-</body>
+    <dialog id="modal"><form id="modal-form" method="dialog"><header><h3 id="modal-title"></h3><button type="button" id="modal-close" class="icon-button" aria-label="Fechar">&times;</button></header><div id="modal-body" class="stack"></div><footer><button type="button" id="modal-cancel" class="secondary">Cancelar</button><button id="modal-submit" value="default">Salvar</button></footer></form></dialog>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
 </html>
