@@ -34,20 +34,20 @@
 
     <div id="app" class="app hidden">
       <aside class="sidebar">
-        <div><p class="eyebrow">ESTOQUE</p><h1>Controle</h1></div>
+        <div class="brand"><div class="brand-mark" aria-hidden="true">▦</div><div><p class="eyebrow">GESTÃO OPERACIONAL</p><h1>Estoque Pro</h1></div></div>
         <nav id="navigation" aria-label="Navegacao principal">
-          <button data-page="dashboard" class="active">Visao geral</button>
-          <button data-page="products">Produtos</button>
-          <button data-page="movements">Movimentacoes</button>
-          <button data-page="condiments">Condimentos</button>
-          <button data-page="reports">Relatorios</button>
-          <button data-page="users" data-admin-only>Usuarios</button>
+          <button data-page="dashboard" class="active"><span>⌂</span>Visão geral</button>
+          <button data-page="products"><span>▤</span>Produtos</button>
+          <button data-page="movements"><span>⇄</span>Movimentações</button>
+          <button data-page="condiments"><span>◉</span>Condimentos</button>
+          <button data-page="reports"><span>▥</span>Relatórios</button>
+          <button data-page="users" data-admin-only><span>♙</span>Usuários</button>
         </nav>
-        <div class="account"><strong id="user-name"></strong><span id="user-role" class="badge"></span><button id="logout" class="link-button">Sair</button></div>
+        <div class="account"><div class="avatar" id="user-initials">U</div><div><strong id="user-name"></strong><span id="user-role" class="badge"></span></div><button id="logout" class="link-button" title="Sair">↪</button></div>
       </aside>
       <main class="content">
         <div id="toast" class="toast" role="status"></div>
-        <header class="page-header"><div><p id="page-kicker" class="eyebrow">PAINEL</p><h2 id="page-title">Visao geral</h2></div><button id="refresh" class="secondary">Atualizar</button></header>
+        <header class="page-header"><div><p id="page-kicker" class="eyebrow">PAINEL</p><h2 id="page-title">Visão geral</h2><p id="page-subtitle" class="page-subtitle">Acompanhe o estoque e as atividades recentes.</p></div><button id="refresh" class="secondary refresh-button"><span>↻</span> Atualizar</button></header>
         <section id="page-content"></section>
       </main>
     </div>

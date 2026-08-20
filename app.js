@@ -4,7 +4,8 @@
   const pageContent = $("#page-content");
   const modal = $("#modal");
   const state = { client: null, user: null, profile: null, page: "dashboard" };
-  const titles = { dashboard: "Visao geral", products: "Produtos", movements: "Movimentacoes", condiments: "Condimentos", reports: "Relatorios mensais", users: "Usuarios" };
+  const titles = { dashboard: "Visão geral", products: "Produtos", movements: "Movimentações", condiments: "Condimentos", reports: "Relatórios mensais", users: "Usuários" };
+  const subtitles = { dashboard: "Acompanhe o estoque e as atividades recentes.", products: "Cadastre, consulte e acompanhe os níveis dos seus itens.", movements: "Registre entradas e saídas para manter o saldo atualizado.", condiments: "Controle pesos, contagens e reposições de condimentos.", reports: "Consulte o consumo e registre a conferência mensal.", users: "Defina os níveis de acesso da equipe." };
   const roleLabel = { admin: "Administrador", operator: "Operador", viewer: "Visualizador", pending: "Aguardando liberacao" };
 
   function escape(value) {
@@ -36,6 +37,7 @@
       $("#auth-screen").classList.add("hidden"); $("#app").classList.remove("hidden");
       $("#user-name").textContent = state.profile.full_name || state.user.email;
       $("#user-role").textContent = roleLabel[state.profile.role] || state.profile.role;
+      $("#user-initials").textContent = (state.profile.full_name || state.user.email || "U").split(/\s|@/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
       document.querySelectorAll("[data-admin-only]").forEach((el) => el.classList.toggle("hidden", !isAdmin()));
       render();
     } catch (error) { setAuthMessage("Sua conta ainda esta sendo preparada. Tente entrar novamente em alguns segundos."); console.error(error); }
@@ -67,7 +69,8 @@
     const [stock, { data: movements, error }] = await Promise.all([allStock(), state.client.from("movements").select("id,type,quantity,created_at,products(name)").order("created_at", { ascending: false }).limit(12)]);
     if (error) throw error;
     const low = stock.filter((item) => item.stock <= number(item.minimum_stock));
-    pageContent.innerHTML = `<div class="cards"><article class="card"><p>Produtos cadastrados</p><strong>${stock.length}</strong></article><article class="card"><p>Estoque baixo</p><strong>${low.length}</strong></article><article class="card"><p>Movimentacoes recentes</p><strong>${movements.length}</strong></article></div><section class="panel"><div class="panel-head"><h3>Ultimas movimentacoes</h3></div>${table(["Data", "Produto", "Tipo", "Quantidade"], movements.map((item) => `<tr><td>${dateTime(item.created_at)}</td><td>${escape(item.products?.name)}</td><td>${item.type === "entry" ? "Entrada" : "Saida"}</td><td>${fmt(item.quantity)}</td></tr>`).join(""))}</section>`;
+    const totalStock = stock.reduce((sum, item) => sum + item.stock, 0);
+    pageContent.innerHTML = `<div class="cards"><article class="card"><p>Produtos cadastrados</p><strong>${stock.length}</strong><p class="metric-detail">Itens sob acompanhamento</p></article><article class="card"><p>Estoque em alerta</p><strong>${low.length}</strong><p class="metric-detail">No mínimo ou abaixo dele</p></article><article class="card"><p>Saldo em estoque</p><strong>${fmt(totalStock)}</strong><p class="metric-detail">Unidades disponíveis</p></article></div><div class="dashboard-layout"><section class="panel"><div class="panel-head"><h3>Últimas movimentações</h3></div>${table(["Data", "Produto", "Tipo", "Quantidade"], movements.map((item) => `<tr><td>${dateTime(item.created_at)}</td><td>${escape(item.products?.name)}</td><td>${item.type === "entry" ? "Entrada" : "Saída"}</td><td>${fmt(item.quantity)}</td></tr>`).join(""))}</section><aside class="panel"><div class="panel-head"><h3>Itens para atenção</h3><span class="badge">${low.length}</span></div><div class="status-list">${low.slice(0, 7).map((item) => `<div class="status-row"><div class="stock-name"><i class="stock-dot"></i><span>${escape(item.name)}</span></div><span class="stock-value">${fmt(item.stock)}</span></div>`).join("") || '<p class="hint">Nenhum item com estoque baixo.</p>'}</div></aside></div>`;
   }
   async function products() {
     const stock = await allStock();
@@ -101,7 +104,7 @@
     pageContent.innerHTML = `<section class="panel"><div class="panel-head"><h3>Perfis de acesso</h3></div><p class="hint">Contas novas entram como visualizadoras. Promova-as aqui depois que confirmarem o e-mail.</p>${table(["Nome", "E-mail", "Perfil", "Criado em", ""], data.map((item) => `<tr><td>${escape(item.full_name)}</td><td>${escape(item.email)}</td><td>${escape(roleLabel[item.role])}</td><td>${dateTime(item.created_at)}</td><td>${item.id === state.user.id ? "" : `<button data-action="edit-user" data-id="${item.id}" class="secondary">Alterar perfil</button>`}</td></tr>`).join(""))}</section>`;
   }
   async function render() {
-    if (!state.profile) return; $("#page-title").textContent = titles[state.page]; $("#page-kicker").textContent = state.page === "dashboard" ? "PAINEL" : "ESTOQUE";
+    if (!state.profile) return; $("#page-title").textContent = titles[state.page]; $("#page-subtitle").textContent = subtitles[state.page]; $("#page-kicker").textContent = state.page === "dashboard" ? "PAINEL" : "ESTOQUE";
     if (state.profile.role === "pending") { pageContent.innerHTML = '<section class="panel empty"><h3>Acesso aguardando liberacao</h3><p>Um administrador precisa definir o seu perfil antes que voce possa consultar o estoque.</p></section>'; return; }
     pageContent.innerHTML = '<section class="panel empty">Carregando...</section>';
     try { await ({ dashboard, products, movements, condiments, reports, users }[state.page])(); } catch (error) { fail(error); pageContent.innerHTML = '<section class="panel empty">Nao foi possivel carregar os dados.</section>'; }
